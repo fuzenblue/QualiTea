@@ -10,13 +10,15 @@ CREATE TABLE IF NOT EXISTS teas (
 
 CREATE TABLE IF NOT EXISTS bookings (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    booking_date DATE NOT NULL,
     queue_number INT NOT NULL,
     customer_name VARCHAR(100) NOT NULL,
     phone VARCHAR(20),
     note TEXT,
     status ENUM('WAITING', 'IN_PROGRESS', 'DONE', 'CANCELED') DEFAULT 'WAITING',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_daily_queue (booking_date, queue_number)
 );
 
 INSERT INTO teas (name, description, price, category) VALUES

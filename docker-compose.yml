@@ -62,6 +62,18 @@ services:
     networks:
       - qualitea_net
 
+  websocket:
+    image: node:alpine
+    container_name: qualitea_websocket
+    working_dir: /app
+    volumes:
+      - ./websocket:/app
+    command: sh -c "npm install && node server.js"
+    ports:
+      - "3000:3000"
+    networks:
+      - qualitea_net
+
   adminer:
     image: adminer
     container_name: qualitea_adminer

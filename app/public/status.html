@@ -96,6 +96,8 @@
     <div id="result"></div>
 
     <script>
+        let currentQueueNumber = null;
+
         async function checkStatus() {
             const query = document.getElementById('query').value;
             if (!query) return;
@@ -106,7 +108,9 @@
 
                 if (data.error) {
                     document.getElementById('result').innerHTML = `<p style="color: red;">${data.error}</p>`;
+                    currentQueueNumber = null;
                 } else {
+                    currentQueueNumber = data.queue_number;
                     document.getElementById('result').innerHTML = `
                         <div class="status-card">
                             <div>Queue Number</div>
@@ -121,6 +125,23 @@
                 document.getElementById('result').textContent = 'Network error';
             }
         }
+
+        // WebSocket Connection
+        const ws = new WebSocket('ws://localhost:3000');
+
+        ws.onopen = () => {
+            console.log('Connected to Real-time Queue Service');
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            console.log('Received update:', data);
+
+            // If we are watching a queue and its status changes, or a queue ahead of us changes
+            if (currentQueueNumber) {
+                checkStatus(); // Simplest approach: just refresh to get new 'ahead' count and status
+            }
+        };
     </script>
 </body>
 

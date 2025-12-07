@@ -1,0 +1,9 @@
+{
+    "name": "qualitea-websocket",
+    "version": "1.0.0",
+    "description": "Simple WebSocket server for Qualitea",
+    "main": "server.js",
+    "dependencies": {
+        "ws": "^8.13.0"
+    }
+}
