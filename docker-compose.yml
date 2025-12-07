@@ -1,10 +1,29 @@
 version: '3.8'
 
 services:
-  app:
+  app1:
     build:
       context: ./app
-    container_name: qualitea_app
+    container_name: qualitea_app1
+    environment:
+      - INSTANCE_ID=APP_1
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./app:/var/www/html
+    networks:
+      - qualitea_net
+
+  app2:
+    build:
+      context: ./app
+    container_name: qualitea_app2
+    environment:
+      - INSTANCE_ID=APP_2
+    depends_on:
+      db:
+        condition: service_healthy
     volumes:
       - ./app:/var/www/html
     networks:
@@ -19,7 +38,8 @@ services:
       - ./app:/var/www/html
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
     depends_on:
-      - app
+      - app1
+      - app2
     networks:
       - qualitea_net
 
@@ -31,9 +51,22 @@ services:
       MYSQL_DATABASE: qualitea_db
       MYSQL_USER: user
       MYSQL_PASSWORD: password
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
       - db_data:/var/lib/mysql
+    networks:
+      - qualitea_net
+
+  adminer:
+    image: adminer
+    container_name: qualitea_adminer
+    ports:
+      - "8081:8080"
     networks:
       - qualitea_net
 

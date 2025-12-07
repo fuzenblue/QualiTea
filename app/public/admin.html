@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Qualitea</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+        }
+
+        .nav {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .nav a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8f9fa;
+        }
+
+        button {
+            padding: 4px 8px;
+            cursor: pointer;
+            margin-right: 2px;
+        }
+
+        .status-WAITING {
+            color: #856404;
+            background-color: #fff3cd;
+        }
+
+        .status-IN_PROGRESS {
+            color: #0c5460;
+            background-color: #d1ecf1;
+        }
+
+        .status-DONE {
+            color: #155724;
+            background-color: #d4edda;
+        }
+
+        .status-CANCELED {
+            color: #721c24;
+            background-color: #f8d7da;
+        }
+    </style>
+</head>
+
+<body>
+    <h1 style="text-align: center;">Admin Queue Management</h1>
+    <div class="nav">
+        <a href="index.html">Menu</a>
+        <a href="booking.html">Book Queue</a>
+        <a href="status.html">Check Status</a>
+        <a href="admin.html">Admin</a>
+    </div>
+
+    <button onclick="loadBookings()">Refresh</button>
+
+    <table id="booking-table">
+        <thead>
+            <tr>
+                <th>Queue</th>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Note</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        async function loadBookings() {
+            try {
+                const res = await fetch('/api/admin/bookings');
+                const bookings = await res.json();
+                const tbody = document.querySelector('#booking-table tbody');
+                tbody.innerHTML = '';
+
+                bookings.forEach(b => {
+                    const tr = document.createElement('tr');
+                    tr.className = `status-${b.status}`;
+                    tr.innerHTML = `
+                        <td><strong>#${b.queue_number}</strong></td>
+                        <td>${b.customer_name}</td>
+                        <td>${b.phone}</td>
+                        <td>${b.note || '-'}</td>
+                        <td>${b.status}</td>
+                        <td>
+                            <button onclick="updateStatus(${b.id}, 'WAITING')">Wait</button>
+                            <button onclick="updateStatus(${b.id}, 'IN_PROGRESS')">Call</button>
+                            <button onclick="updateStatus(${b.id}, 'DONE')">Done</button>
+                            <button onclick="updateStatus(${b.id}, 'CANCELED')">Cancel</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (err) {
+                alert('Failed to load bookings');
+            }
+        }
+
+        async function updateStatus(id, status) {
+            if (!confirm(`Set status to ${status}?`)) return;
+            try {
+                await fetch('/api/admin/update-status', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, status })
+                });
+                loadBookings();
+            } catch (err) {
+                alert('Failed to update status');
+            }
+        }
+
+        loadBookings();
+        setInterval(loadBookings, 10000); // Auto refresh every 10s
+    </script>
+</body>
+
+</html>

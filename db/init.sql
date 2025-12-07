@@ -1,21 +1,26 @@
 CREATE TABLE IF NOT EXISTS teas (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
+    name VARCHAR(100) NOT NULL,
     description TEXT,
     price DECIMAL(10, 2) NOT NULL,
+    category VARCHAR(50) NOT NULL DEFAULT 'General',
+    is_active TINYINT(1) DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS bookings (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    customer_name VARCHAR(255) NOT NULL,
-    tea_id INT,
-    booking_date DATETIME NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (tea_id) REFERENCES teas(id)
+    queue_number INT NOT NULL,
+    customer_name VARCHAR(100) NOT NULL,
+    phone VARCHAR(20),
+    note TEXT,
+    status ENUM('WAITING', 'IN_PROGRESS', 'DONE', 'CANCELED') DEFAULT 'WAITING',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-INSERT INTO teas (name, description, price) VALUES
-('Earl Grey', 'Black tea flavored with bergamot oil', 5.50),
-('Matcha Green Tea', 'Finely ground powder of specially grown and processed green tea leaves', 6.00),
-('Oolong', 'Traditional semi-oxidized Chinese tea', 5.75);
+INSERT INTO teas (name, description, price, category) VALUES
+('Earl Grey', 'Black tea flavored with bergamot oil', 45.00, 'Classic'),
+('Matcha Green Tea', 'Finely ground powder of green tea', 60.00, 'Premium'),
+('Oolong', 'Semi-oxidized Chinese tea', 50.00, 'Classic'),
+('Thai Tea', 'Sweet and creamy Thai style tea', 40.00, 'Sweet');

@@ -1,6 +1,7 @@
 <?php
 
-function get_db_connection() {
+function get_db_connection()
+{
     $host = 'db';
     $db   = 'qualitea_db';
     $user = 'user';

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check Status - Qualitea</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .nav {
+            margin-bottom: 20px;
+        }
+
+        .nav a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .search-box {
+            margin: 20px 0;
+        }
+
+        input {
+            padding: 8px;
+            width: 200px;
+        }
+
+        button {
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+
+        .status-card {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-top: 20px;
+            min-width: 300px;
+        }
+
+        .queue-big {
+            font-size: 3em;
+            margin: 10px 0;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 4px;
+            color: white;
+            background: #6c757d;
+        }
+
+        .WAITING {
+            background: #ffc107;
+            color: black;
+        }
+
+        .IN_PROGRESS {
+            background: #17a2b8;
+        }
+
+        .DONE {
+            background: #28a745;
+        }
+
+        .CANCELED {
+            background: #dc3545;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Check Queue Status</h1>
+    <div class="nav">
+        <a href="index.html">Menu</a>
+        <a href="booking.html">Book Queue</a>
+        <a href="status.html">Check Status</a>
+        <a href="admin.html">Admin</a>
+    </div>
+
+    <div class="search-box">
+        <input type="text" id="query" placeholder="Enter Queue # or Phone">
+        <button onclick="checkStatus()">Search</button>
+    </div>
+
+    <div id="result"></div>
+
+    <script>
+        async function checkStatus() {
+            const query = document.getElementById('query').value;
+            if (!query) return;
+
+            try {
+                const res = await fetch(`/api/queue-status?queue_number=${encodeURIComponent(query)}`);
+                const data = await res.json();
+
+                if (data.error) {
+                    document.getElementById('result').innerHTML = `<p style="color: red;">${data.error}</p>`;
+                } else {
+                    document.getElementById('result').innerHTML = `
+                        <div class="status-card">
+                            <div>Queue Number</div>
+                            <div class="queue-big">#${data.queue_number}</div>
+                            <div>Status: <span class="status-badge ${data.status}">${data.status}</span></div>
+                            <br>
+                            <div><strong>${data.ahead}</strong> queues ahead of you</div>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                document.getElementById('result').textContent = 'Network error';
+            }
+        }
+    </script>
+</body>
+
+</html>

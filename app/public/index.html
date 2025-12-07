@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qualitea Shop</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; text-align: center; }
+        .nav { margin-bottom: 20px; }
+        .nav a { margin: 0 10px; text-decoration: none; color: #333; font-weight: bold; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; max-width: 800px; margin: 0 auto; }
+        .card { border: 1px solid #ddd; padding: 15px; border-radius: 8px; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); }
+        .price { color: green; font-weight: bold; }
+        .category { font-size: 0.8em; color: #666; }
+    </style>
+</head>
+<body>
+    <h1>Welcome to Qualitea</h1>
+    <div class="nav">
+        <a href="index.html">Menu</a>
+        <a href="booking.html">Book Queue</a>
+        <a href="status.html">Check Status</a>
+        <a href="admin.html">Admin</a>
+    </div>
+
+    <div id="loading">Loading teas...</div>
+    <div id="tea-list" class="grid"></div>
+
+    <script>
+        fetch('/api/teas')
+            .then(res => res.json())
+            .then(teas => {
+                document.getElementById('loading').style.display = 'none';
+                const container = document.getElementById('tea-list');
+                teas.forEach(tea => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <h3>${tea.name}</h3>
+                        <p class="category">${tea.category}</p>
+                        <p>${tea.description}</p>
+                        <p class="price">$${parseFloat(tea.price).toFixed(2)}</p>
+                    `;
+                    container.appendChild(card);
+                });
+            })
+            .catch(err => {
+                document.getElementById('loading').textContent = 'Failed to load teas.';
+            });
+    </script>
+</body>
+</html>
