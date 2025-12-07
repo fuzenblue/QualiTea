@@ -1,0 +1,10 @@
+{
+    "name": "qualitea/app",
+    "description": "Qualitea Application",
+    "autoload": {
+        "psr-4": {
+            "Qualitea\\": "src/"
+        }
+    },
+    "require": {}
+}
