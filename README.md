@@ -1,95 +1,111 @@
-# 🍵 Qualitea - High Performance Queue Management System
+# 🍵 Qualitea - Enterprise Queue Management System
 
-**Qualitea** is a robust, clean, and scalable web application for managing tea shop orders and queues. Built with performance and concurrency in mind, it leverages a containerized microservices-like architecture to ensure reliability under high load.
+**Qualitea** is a high-performance, containerized web application designed for scalability and reliability. It features a complete **DevOps stack** including Monitoring, Logging, Alerting, and CI/CD, making it a production-ready template.
 
 ## 🏗 System Architecture
 
-The system mimics a production-grade environment using Docker Compose:
+The system is built on a Microservices-like architecture orchestrated by Docker Compose:
 
-*   **Load Balancer**: NGINX (Reverse Proxy) balances traffic using Round-Robin strategy.
-*   **Application**: 2x PHP-FPM Instances (`app1`, `app2`) handling business logic (Stateless).
-*   **Database**: MySQL 8.0 with persistent storage and connection health checks.
-*   **Real-time**: Node.js WebSocket Server for instant queue status updates.
-*   **Monitoring Stack**:
-    *   **Prometheus**: Time-series database for metrics collection.
-    *   **Grafana**: Visualization dashboard for system performance.
-    *   **Node Exporter**: Hardware and OS metrics collector.
-*   **Management**: Adminer for database GUI.
+*   **Core Services**:
+    *   **Load Balancer**: NGINX (Reverse Proxy & Load Balancing).
+    *   **Application**: 2x PHP-FPM Replicas (Stateless).
+    *   **Database**: MySQL 8.0 with Healthchecks.
+    *   **Caching**: Redis (available for session/query caching).
+    *   **Real-time**: Node.js WebSocket Server.
+
+*   **Observability Stack (LGTM)**:
+    *   **Loki**: Centralized Log Aggregation.
+    *   **Grafana**: Unified Dashboard for Metrics & Logs.
+    *   **Prometheus**: Metrics Collection.
+    *   **Promtail**: Log Helper (Ships Docker logs to Loki).
+    *   **Node Exporter**: Hardware Monitoring.
+    *   **Alertmanager**: Handle system alerts.
+
+*   **Integrations**:
+    *   **Line Messaging API**: Real-time critical alerts sent push notifications to Line App.
 
 ## 🚀 Features
 
-*   **Customer Facing**:
-    *   📋 **Menu**: Browse available teas.
-    *   🎫 **Booking**: Get a queue number (Auto-reset daily).
-    *   🔍 **Track**: Real-time status checking (Wait time/Queues ahead).
-*   **Admin Facing**:
-    *   🛠 **Dashboard**: Manage queue status (Call, Done, Cancel).
-*   **DevOps & Observability**:
-    *   📊 **Full-Stack Monitoring**: Real-time CPU, RAM, and Network metrics via Grafana.
-    *   ✅ **Race Condition Proof**: Handles 2000+ concurrent requests without duplicate queues.
-    *   ✅ **Zero-Downtime Ready**: Stateless application design.
+*   ✅ **High Concurrency**: Handles 2000+ RPS without race conditions.
+*   ✅ **Real-time Updates**: Queue status updates instantly via WebSockets.
+*   ✅ **Full Observability**: View Logs and Metrics in a single dashboard.
+*   ✅ **Alerting**: Get notified via Line when the server is down or under high load.
+*   ✅ **CI/CD**: Automated testing pipeline with GitHub Actions.
 
 ## 🛠 Prerequisites
 
-*   Docker & Docker Compose
+1.  Docker & Docker Compose
+2.  Line Messaging API Token (Optional, for alerts)
 
 ## ⚡️ Quick Start
 
-1.  **Clone & Start**:
-    ```bash
-    # Start all services (App + DB + Monitoring)
-    docker-compose up -d --build
-    ```
-
-2.  **Access the Dashboard**:
-    *   **Main App**: [http://localhost:8080](http://localhost:8080)
-    *   **Grafana (Monitoring)**: [http://localhost:3001](http://localhost:3001)
-        *   *Default Creds*: `admin` / `admin`
-    *   **Prometheus**: [http://localhost:9090](http://localhost:9090)
-    *   **Adminer (DB GUI)**: [http://localhost:8081](http://localhost:8081)
-        *   *Creds*: System: `MySQL`, Server: `db`, User: `user`, Pass: `password`, DB: `qualitea_db`
-
-## 📊 Setting Up Monitoring
-
-To view the system metrics in Grafana:
-
-1.  Go to **[http://localhost:3001](http://localhost:3001)**.
-2.  **Add Data Source**: Select **Prometheus** -> URL: `http://prometheus:9090` -> Save & Test.
-3.  **Import Dashboard**:
-    *   Go to **Dashboards** > **Import**.
-    *   Use ID **1860** (Node Exporter Full) to load a comprehensive system overview.
-
-## 🧪 Testing & Verification
-
-### Load Testing with k6
-We use **k6** to simulate high traffic. You can observe the impact on the system in real-time via Grafana.
-
-```powershell
-# Run load test via Docker
-docker run --rm --network qualitea_qualitea_net -v "d:\qualitea\tests:/src" grafana/k6 run /src/stress-test.js
-
-# Or run locally (if k6 is installed)
-k6 run -e BASE_URL=http://localhost:8080 tests/stress-test.js
+### 1. Configuration
+Create a `.env` file in the root directory:
+```properties
+# Line Messaging API Configuration
+LINE_CHANNEL_ACCESS_TOKEN=your_long_lived_token_here
+LINE_USER_ID=your_user_id_here
 ```
 
-**What to watch on Grafana:**
-*   **CPU Usage**: Should spike during the booking phase.
-*   **Network I/O**: Should increase correlating with the requests per second.
+### 2. Start System
+```bash
+docker-compose up -d --build
+```
+*Wait ~30 seconds for all healthchecks to pass.*
+
+### 3. Access Interfaces
+| Service | URL | Default Creds |
+|---------|-----|---------------|
+| **Main App** | [http://localhost:8080](http://localhost:8080) | - |
+| **Grafana** | [http://localhost:3001](http://localhost:3001) | `admin` / `admin` |
+| **Prometheus** | [http://localhost:9090](http://localhost:9090) | - |
+| **B GUI** | [http://localhost:8081](http://localhost:8081) | User: `user` / Pass: `password` |
+
+## 📊 Monitoring & Logging Guide
+
+### Setting up Grafana
+1.  **Login** to Grafana (admin/admin).
+2.  **Add Data Sources**:
+    *   **Prometheus**: URL `http://prometheus:9090`
+    *   **Loki**: URL `http://loki:3100` (for Logs)
+3.  **Import Dashboards**:
+    *   ID **1860** (Node Exporter Full) -> Select Prometheus datasource.
+
+### Viewing Logs
+1.  Go to **Explore** sidebar menu.
+2.  Select **Loki** as the source.
+3.  Query: `{container="qualitea_app1"}` to see PHP logs, or `{job="docker"}` for all.
+
+## 🧪 Testing
+
+### Load Testing (k6)
+Simulate 2000 concurrent users to test auto-scaling and monitoring.
+```powershell
+docker run --rm --network qualitea_qualitea_net -v "d:\qualitea\tests:/src" grafana/k6 run /src/stress-test.js
+```
+
+### CI/CD Pipeline
+This project includes a **GitHub Actions** workflow (`.github/workflows/ci-cd.yml`) that:
+1.  Builds Docker images.
+2.  Starts the stack.
+3.  Runs k6 stress tests automatically on every Push.
 
 ## 📂 Project Structure
 
 ```text
 qualitea/
-├── app/                 # PHP Application Code
-├── db/                  # Database Init Scripts
-├── monitoring/          # Monitoring Configuration
-│   └── prometheus/      # Prometheus.yml
-├── nginx/               # NGINX Configuration
-├── tests/               # k6 Load Test Scripts
-├── websocket/           # Node.js WebSocket Server
-├── scripts/             # Deployment Scripts
-└── docker-compose.yml   # Orchestration
+├── app/                 # Application Source
+├── db/                  # Database Migration
+├── monitoring/          # Observability Configs
+│   ├── alertmanager/    # Alert Rules
+│   ├── line_bridge/     # Line Notification Service
+│   ├── loki/            # Logging Config
+│   └── prometheus/      # Metrics Config
+├── nginx/               # Load Balancer Config
+├── tests/               # Stress Tests
+├── .github/             # CI/CD Workflows
+└── docker-compose.yml   # Stack Definition
 ```
 
 ---
-*Generated for Qualitea Project*
+*Developed for High-Performance & Reliability*
