@@ -30,7 +30,7 @@ export const options = {
     },
 };
 
-const BASE_URL = 'http://qualitea_nginx';
+const BASE_URL = __ENV.BASE_URL || 'http://qualitea_nginx';
 
 export function browseMenu() {
     const res = http.get(`${BASE_URL}/api/teas`);

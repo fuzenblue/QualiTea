@@ -82,9 +82,51 @@ services:
     networks:
       - qualitea_net
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: qualitea_prometheus
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - qualitea_net
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: qualitea_grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - qualitea_net
+
+  node_exporter:
+    image: prom/node-exporter:latest
+    container_name: qualitea_node_exporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points'
+      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+    networks:
+      - qualitea_net
+
 networks:
   qualitea_net:
     driver: bridge
 
 volumes:
   db_data:
+  prometheus_data:
+  grafana_data:
