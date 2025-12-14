@@ -190,7 +190,8 @@ services:
     volumes:
       - ./monitoring/line_bridge:/app
     environment:
-      - LINE_NOTIFY_TOKEN=${LINE_TOKEN} # Use .env or pass at runtime
+      - LINE_CHANNEL_ACCESS_TOKEN=${LINE_CHANNEL_ACCESS_TOKEN}
+      - LINE_USER_ID=${LINE_USER_ID}
     command: sh -c "npm install && node server.js"
     networks:
       - qualitea_net
