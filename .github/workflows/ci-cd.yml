@@ -1,0 +1,47 @@
+name: Qualitea CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      # Service containers to run with `runner-job`
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: qualitea_db
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build Docker Images
+      run: docker-compose build
+
+    - name: Start Services
+      run: docker-compose up -d
+
+    - name: Sleep for 10 seconds (wait for db)
+      run: sleep 10
+
+    - name: Run k6 Load Test
+      uses: grafana/k6-action@v0.3.0
+      with:
+        filename: tests/stress-test.js
+        flags: --env BASE_URL=http://localhost:8080
+      
+    - name: Stop Services
+      if: always()
+      run: docker-compose down

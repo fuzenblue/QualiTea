@@ -1,0 +1,18 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'line-notify'
+
+receivers:
+  - name: 'line-notify'
+    webhook_configs:
+      # Note: Prometheus Alertmanager cannot send directly to Line Notify format.
+      # You need a bridge service or a specific webhook transformer.
+      # For now, this points to a placeholder bridge service.
+      - url: 'http://line-notify-bridge:8080/alert'
+        send_resolved: true
