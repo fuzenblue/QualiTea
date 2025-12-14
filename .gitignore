@@ -1,1 +1,29 @@
+# Environment Variables
 .env
+
+# Dependencies
+node_modules/
+*/node_modules/
+
+# OS Generated Files
+.DS_Store
+Thumbs.db
+._*
+
+# IDE & Editor Directories
+.idea/
+.vscode/
+*.swp
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+nginx/logs/
+
+# Docker
+docker-compose.override.yml
+
+# Testing outputs (if any)
+tests/k6-results/
